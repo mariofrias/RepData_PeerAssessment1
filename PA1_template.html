@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>CALCULATE THE TOTAL STEPS PER DAY  BEGIN</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<p>activityData &lt;- read.csv (&ldquo;activity.csv&rdquo;, header = T, sep = &ldquo;,&rdquo;, stringsAsFactors = F)</p>
+
+<p>activityData$date &lt;- as.Date(activityData$date, &ldquo;%Y-%m-%d&rdquo;)
+str(activityData)</p>
+
+<p>dim(activityData)</p>
+
+<p>head(activityData)</p>
+
+<h2>CALCULATE THE TOTAL STEPS PER DAY  BEGIN</h2>
+
+<p>library (dplyr)
+AvgDay&lt;-activityData %&gt;% group_by(date) %&gt;% </p>
+
+<p>summarize(total.steps = sum(steps,na.rm=T),mean.steps =mean(steps,na.rm = T))</p>
+
+<p>library(ggplot2)
+g &lt;- ggplot(AvgDay, aes(x=total.steps))
+g + geom_histogram(binwidth = 2500) + theme(axis.text = element_text(size = 12),<br/>
+      axis.title = element_text(size = 14)) + labs(y = &ldquo;Frequency&rdquo;) + labs(x = &ldquo;Total steps/day&rdquo;)</p>
+
+<p>summary(AvgDay$total.steps)</p>
+
+<p>summary (AvgDay$mean.steps)</p>
+
+<h2>CALCULATE THE TOTAL STEPS PER DAY  END</h2>
+
+<h2>CALCULATE DAILY ACTIVITY PATTERN  BEGIN</h2>
+
+<p>AvgInterval &lt;- activityData %&gt;% group_by(interval) %&gt;%
+      summarize(mean.steps = mean(steps, na.rm = T))
+g &lt;- ggplot(AvgInterval, aes(x = interval, y = mean.steps))
+g + geom_line() + theme(axis.text = element_text(size = 12), 
+      axis.title = element_text(size = 14, face = &ldquo;bold&rdquo;)) + 
+      labs(y = &ldquo;Mean number of steps&rdquo;) + labs(x = &ldquo;Interval&rdquo;)</p>
+
+<h2>CALCULATE DAILY ACTIVITY PATTERN  END</h2>
+
+<h2>CALCULATE MISSING VALUES  BEGIN</h2>
+
+<p>mean(is.na(activityData$steps))</p>
+
+<p>sum(is.na(activityData$steps))</p>
+
+<p>sum(is.na(AvgInterval$mean.steps))</p>
+
+<p>newData &lt;- activityData</p>
+
+<p>for (i in 1:nrow(newData)) {
+      if (is.na(newData$steps[i])) {
+            index &lt;- newData$interval[i]
+            value &lt;- subset(AvgInterval, interval==index)
+            newData$steps[i] &lt;- value$mean.steps
+      }
+}
+head(newData)</p>
+
+<p>newAvg &lt;- newData %&gt;% group_by(date) %&gt;% summarize(total.steps = sum(steps, na.rm = T))</p>
+
+<p>g &lt;- ggplot(newAvg, aes(x=total.steps))
+g + geom_histogram(binwidth = 2500) + theme(axis.text = element_text(size = 12),
+      axis.title = element_text(size = 14)) + labs(y = &ldquo;Frequency&rdquo;) + labs(x = &ldquo;Total steps/day&rdquo;)</p>
+
+<pre><code>  summary (AvgDay$total.steps)
+
+  sd(AvgDay$total.steps, na.rm=T)
+
+  summary (newAvg$total.steps)
+
+  sd(newAvg$total.steps, na.rm=T)
+</code></pre>
+
+<h2>CALCULATE MISSING VALUES  END</h2>
+
+<h2>CALCULATE differences in activity patterns between weekdays and weekends BEGIN</h2>
+
+<p>newData$day &lt;- ifelse(weekdays(newData$date) %in% c(&ldquo;Saturday&rdquo;, &ldquo;Sunday&rdquo;), &ldquo;weekend&rdquo;, &ldquo;weekday&rdquo;)</p>
+
+<p>wkend &lt;- filter(newData, day == &ldquo;weekend&rdquo;)
+wkday &lt;- filter(newData, day == &ldquo;weekday&rdquo;)</p>
+
+<p>wkend &lt;- wkend %&gt;%
+      group_by(interval) %&gt;%
+      summarize(mean.steps = mean(steps)) 
+wkend$day &lt;- &ldquo;weekend&rdquo;</p>
+
+<p>wkday &lt;- wkday %&gt;%
+      group_by(interval) %&gt;%
+      summarize(mean.steps = mean(steps)) 
+wkday$day &lt;- &ldquo;weekday&rdquo;</p>
+
+<p>newInterval &lt;- rbind(wkend, wkday)
+newInterval$day &lt;- as.factor(newInterval$day)
+newInterval$day &lt;- relevel(newInterval$day, &ldquo;weekend&rdquo;)</p>
+
+<p>g &lt;- ggplot (newInterval, aes (interval, mean.steps))
+g + geom_line() + facet_grid (day~.) + theme(axis.text = element_text(size = 12), 
+      axis.title = element_text(size = 14)) + labs(y = &ldquo;Number of Steps&rdquo;) + labs(x = &ldquo;Interval&rdquo;)</p>
+
+<h2>CALCULATE differences in activity patterns between weekdays and weekends END</h2>
+
+</body>
+
+</html>
